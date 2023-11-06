@@ -33,8 +33,11 @@ async def registration(
     return await sign_up.signup(data=data, db=db)
 
 @app.post("/user/sign-in")
-async def login():
-    return await sign_in.signin()
+async def login(
+    data: sign_in.LoginData, 
+    db: Session = _fa.Depends(_db.get_db)
+):
+    return await sign_in.signin(data=data, db=db)
 
 @app.post("/user/sign-out")
 async def logout(
