@@ -1,9 +1,6 @@
-import sqlalchemy as _sa
 import pydantic as _pd
 import fastapi as _fa
 
-from typing import Optional
-from sqlalchemy.orm import Session
 from src.database import database as _db
 from src.models import users as Users
 
