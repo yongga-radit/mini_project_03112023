@@ -13,7 +13,8 @@ class LogoutData(_pd.BaseModel):
 
 
 async def signout(data: LogoutData, db=_fa.Depends(_db.get_db)):
-    result = db.query(Users.UserLogin).filter(Users.UserLogin.refresh_token == data.refresh_token).delete()
+    result = db.query(Users.UserLogin).filter(
+                Users.UserLogin.refresh_token == data.refresh_token).delete()
     
     # if token not found
     if not result:

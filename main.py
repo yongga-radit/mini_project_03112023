@@ -1,15 +1,32 @@
-from typing import List
 import fastapi as _fa
-import fastapi.security as _security
-import sqlalchemy.orm as _orm
+import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
+
 from src.database import database as _db
-from src.models import users as User
-import src.routes as _endpoint
+from src.routes import router
 
-api = _fa.APIRouter()
-
+# creating database
 _db.create_database()
 
-# api.add_api_route('/user/sign-up', signup,
-#                          methods=['POST'], tags=['User'], status_code=200)
+# run the program
+if __name__ == '__main__':
+  uvicorn.run(
+    'app:app',
+    host="127.0.0.1",
+    port=8000,
+    reload=True
+  )
 
+app = _fa.FastAPI(
+  title='Mini Project 03/11/2023',
+)
+
+app.include_router(router)
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)

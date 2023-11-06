@@ -1,34 +1,33 @@
-from datetime import datetime as _dt, timedelta as _delta
+import time
+
 import jwt
+from src.config import config as _config
 from typing import Tuple
 
-SECRET_KEY = "mini_project_03112023"
-REFRESH_TOKEN_EXPIRATION = _delta(days=30)
 
+def generate_refresh_token(payload: str) -> str:
+    current_time = int(time.time())
 
-def generate_refresh_token(payload: dict):
-    # after login, user got token to access the website
-    expiration = _dt.utcnow() + REFRESH_TOKEN_EXPIRATION
     payload.update({
-        'iat': expiration,
-        **payload
+        'iat': current_time
     })
 
-    refresh_token = jwt.encode(payload, SECRET_KEY, algorithm=['HS256'])
+    refresh_token = jwt.encode(
+        payload, _config.config.REFRESH_PRIVATE_KEY.encode('utf-8'), 'RS256')
 
     return refresh_token
 
 
-def verify_refreshed_token(refresh_token: str):
-    # checking the token is correct or not
-    try:
-        token_data = jwt.decode(refresh_token, 
-                                SECRET_KEY, 
-                                algorithms=['HS256'])
-        return token_data
-    except jwt.ExpiredSignatureError:
-        # handle token expiration
-        return None
-    except jwt.DecodeError:
-        # handle token decoding error
-        return None
+def generate_access_token(payload: str) -> Tuple[str, int]:
+    current_time = int(time.time())
+    expired_at = current_time + _config.config.ACCESS_TOKEN_EXPIRATION
+
+    payload.update({
+        'exp': expired_at,
+        'iat': current_time
+    })
+
+    access_token = jwt.encode(
+        payload, _config.config.PRIVATE_KEY.encode('utf-8'), "RS256")
+
+    return access_token, expired_at
