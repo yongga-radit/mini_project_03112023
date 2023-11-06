@@ -27,10 +27,11 @@ class RegisterData(_pd.BaseModel):
         return vals
     
     
-async def signup(data: RegisterData, db: Session):
+async def signup(data: RegisterData, db: Session = _fa.Depends(_db.get_db)):
     # check if email already existed
     email_exist = db.query(User).filter(
-                    User.email == data.email).exists().scalar()
+                    "email" == data.email).exists().scalar()
+    # email_exist = 
     if email_exist:
         raise _fa.HTTPException(400, detail="Email already used.")
     
@@ -46,4 +47,5 @@ async def signup(data: RegisterData, db: Session):
     db.commit()
     db.refresh(user)
 
-    return _fa.Response(status_code=201)
+    return 10
+    # return _fa.Response(status_code=201)
