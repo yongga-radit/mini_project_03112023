@@ -28,8 +28,17 @@ async def signin(data: LoginData, db: Session):
     
     payload = {
         'uid': user.id,
-        'email': data.email
+        'email': data.email,
+        
     }
 
     refresh_token = generate_refresh_token(payload)
     
+    return (
+        'id': user.id,
+        'email': data.email,
+        'role': user.role,
+        'access_token': ,
+        'refresh_token': refresh_token,
+        'expired_at': 
+    )
