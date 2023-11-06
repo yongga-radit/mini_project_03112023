@@ -8,7 +8,7 @@ from src.database import database as _db
 from src.models import users as Users
 from src.config import config as _config
 from werkzeug.security import generate_password_hash
-from utils.generate_token import generate_refresh_token, generate_access_token
+from src.utils.generate_token import generate_refresh_token, generate_access_token
 from src.depends import base_response as _response
 
 
@@ -23,20 +23,6 @@ class DataResponse(_pd.BaseModel):
     email: str
     person: str
     role: int
-    defpassword: int
-    info: Optional[object] = {
-        'first_name': None,
-        'last_name': None,
-        'phone': None,
-        'occupation': None,
-        'institution': None,
-        'birthday': None,
-        'updated_at': None,
-    }
-    ntrps: Optional[object] = {
-        'require': False,
-        'credentials': False
-    }
     refresh_token: str
     access_token: str
     expired_at: int
@@ -83,12 +69,16 @@ async def signin(data: LoginData, db: Session):
 
     access_token, access_token_expired_at = generate_access_token(payload)
 
+    # inject token to user login response model
     return LoginResponseModel(
         data=DataResponse(
             user_id=user.id,
             person=user.name,
             email=user.email,
             role=user.role,
-            
+            access_token=access_token,
+            refresh_token=refresh_token,
+            expired_at=access_token_expired_at
+
         )
     )

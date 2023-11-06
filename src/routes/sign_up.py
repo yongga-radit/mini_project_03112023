@@ -29,7 +29,8 @@ class RegisterData(_pd.BaseModel):
     
 async def signup(data: RegisterData, db: Session):
     # check if email already existed
-    email_exist = db.query(User).filter(User.email == data.email).exists().scalar()
+    email_exist = db.query(User).filter(
+                    User.email == data.email).exists().scalar()
     if email_exist:
         raise _fa.HTTPException(400, detail="Email already used.")
     

@@ -1,8 +1,8 @@
 from typing import Any
-from pydantic import BaseModel
+import pydantic as _pd
 
 
-class BaseResponseModel(BaseModel):
+class BaseResponseModel(_pd.BaseModel):
     data: Any = {}
     meta: dict = {}
     success: bool = True

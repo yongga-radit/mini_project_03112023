@@ -4,3 +4,4 @@
 /env
 /pycache
 /database_minipro
+**/__pycache__/
