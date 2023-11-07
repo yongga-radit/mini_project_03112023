@@ -5,7 +5,7 @@ import fastapi as _fa
 from sqlalchemy.orm import Session
 from src.models import users as Users
 from src.config import config as _config
-from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
 from src.utils.generate_token import generate_refresh_token, generate_access_token
 from src.depends import base_response as _response
 
@@ -32,21 +32,22 @@ class LoginResponseModel(_response.BaseResponseModel):
 
 async def signin(data: LoginData, db: Session):
     # check email on db
-    user = db.query(Users.User.email).filter(
-                    Users.User.email == data.email).exists().scalar()
-
+    user = db.query(Users.User).filter(
+                    Users.User.email == data.email).first()
+    
     # if user and password doesn't match
     if user is None:
         raise _fa.HTTPException(400, detail="User not found.")
     else:
-        encrypted_password = generate_password_hash(data.password)
-        if encrypted_password != user.password:
-            _fa.HTTPException(400, detail="Password Incorrect!")
+        # encrypted_password = generate_password_hash(data.password)
+        # if encrypted_password != user.password:
+        if not check_password_hash(user.password, data.password):
+            raise _fa.HTTPException(400, detail="Password Incorrect!")
     
     # get data to generate token
     payload = {
         'uid': user.id,
-        'email': data.email,      
+        'email': data.email   
     }
 
     # check if the user already login before by checking the token
@@ -64,6 +65,7 @@ async def signin(data: LoginData, db: Session):
     # save the token on user
     db.add(user_signin)
     db.commit()
+    db.refresh()
 
     access_token, access_token_expired_at = generate_access_token(payload)
 

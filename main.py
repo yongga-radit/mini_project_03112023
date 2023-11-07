@@ -25,21 +25,21 @@ app = _fa.FastAPI(
   title='Mini Project 03/11/2023',
 )
 
-@app.post("/user/sign-up")
+@app.post("/user/sign-up", tags=["Users"])
 async def registration(
    data: sign_up.RegisterData,
    db: Session = _fa.Depends(_db.get_db)
 ):
     return await sign_up.signup(data=data, db=db)
 
-@app.post("/user/sign-in")
+@app.post("/user/sign-in", tags=["Users"])
 async def login(
     data: sign_in.LoginData, 
     db: Session = _fa.Depends(_db.get_db)
 ):
     return await sign_in.signin(data=data, db=db)
 
-@app.post("/user/sign-out")
+@app.post("/user/sign-out", tags=["Users"])
 async def logout(
    data: sign_out.LogoutData, 
    db: Session = _fa.Depends(_db.get_db)

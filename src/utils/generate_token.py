@@ -13,7 +13,7 @@ def generate_refresh_token(payload: str) -> str:
     })
 
     refresh_token = jwt.encode(
-        payload, _config.config.REFRESH_PRIVATE_KEY.encode('utf-8'), 'RS256')
+        payload, _config.config.REFRESH_PRIVATE_KEY.encode('utf-8'), 'HS256')
 
     return refresh_token
 
