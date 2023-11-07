@@ -2,6 +2,7 @@ import sqlalchemy as _sa
 import pydantic as _pd
 import fastapi as _fa
 
+from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from src.models import users as Users
 from src.config import config as _config
@@ -50,23 +51,25 @@ async def signin(data: LoginData, db: Session):
         'email': data.email   
     }
 
+    expired_in_seconds = _config.config.REFRESH_TOKEN_EXPIRATION
+    current_time = _sa.func.now()
+
     # check if the user already login before by checking the token
     refresh_token = generate_refresh_token(payload)
     user_signin = Users.UserLogin(
         user_id=user.id,
         refresh_token=refresh_token,
-        expired_at=_sa.func.TIMESTAMPADD(
-            _sa.text('SECOND'),
-            _config.config.REFRESH_TOKEN_EXPIRATION,
-            _sa.func.NOW()
-        )
+        expired_at=current_time + timedelta(seconds=expired_in_seconds)
+        # expired_at=_sa.func.TIMESTAMPADD(
+        #     _sa.text('SECOND'),
+        #     _config.config.REFRESH_TOKEN_EXPIRATION,
+        #     _sa.func.NOW()
     )
-
-    # save the token on user
+    
+    # save the token on user to access the website
     db.add(user_signin)
     db.commit()
-    db.refresh()
-
+    
     access_token, access_token_expired_at = generate_access_token(payload)
 
     # inject token to user login response model
@@ -75,7 +78,7 @@ async def signin(data: LoginData, db: Session):
             user_id=user.id,
             person=user.name,
             email=user.email,
-            role=user.role,
+            role=user.user_role,
             access_token=access_token,
             refresh_token=refresh_token,
             expired_at=access_token_expired_at

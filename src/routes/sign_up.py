@@ -5,7 +5,7 @@ import fastapi as _fa
 from typing import Optional
 from sqlalchemy.orm import Session
 from src.database import database as _db
-from src.models import users as User
+from src.models import users as Users
 from werkzeug.security import generate_password_hash
 
 
@@ -33,8 +33,8 @@ async def signup(
         db: Session
         ):
     # check if email already existed
-    email_exist = db.query(User.User).filter(
-                            User.User.email == data.email).first()
+    email_exist = db.query(Users.User).filter(
+                            Users.User.email == data.email).first()
 
     # email_exist = db.execute(
     #     _sa.select(
@@ -50,7 +50,7 @@ async def signup(
     encrypted_password = generate_password_hash(data.password)
 
     # add data to db 
-    user = User.User(
+    user = Users.User(
         email=data.email,
         name=data.name,
         password=encrypted_password,

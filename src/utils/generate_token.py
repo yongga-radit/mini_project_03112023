@@ -28,6 +28,6 @@ def generate_access_token(payload: str) -> Tuple[str, int]:
     })
 
     access_token = jwt.encode(
-        payload, _config.config.PRIVATE_KEY.encode('utf-8'), "RS256")
+        payload, _config.config.PRIVATE_KEY.encode('utf-8'), "HS256")
 
     return access_token, expired_at
