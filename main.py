@@ -1,12 +1,12 @@
 import fastapi as _fa
 import uvicorn
-import sqlalchemy.orm as Session
+from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.database import database as _db
 # from src.routes import router
 import sqlalchemy.orm as _orm
-from src.routes import sign_up, sign_in, sign_out
+from src.routes import sign_up, sign_in, sign_out, refresh_token
 from src.models import users as User
 
 # creating database
@@ -25,12 +25,14 @@ app = _fa.FastAPI(
   title='Mini Project 03/11/2023',
 )
 
+
 @app.post("/user/sign-up", tags=["Users"])
 async def registration(
    data: sign_up.RegisterData,
    db: Session = _fa.Depends(_db.get_db)
 ):
     return await sign_up.signup(data=data, db=db)
+
 
 @app.post("/user/sign-in", tags=["Users"])
 async def login(
@@ -39,6 +41,7 @@ async def login(
 ):
     return await sign_in.signin(data=data, db=db)
 
+
 @app.post("/user/sign-out", tags=["Users"])
 async def logout(
    data: sign_out.LogoutData, 
@@ -46,6 +49,13 @@ async def logout(
 ):
     return await sign_out.signout(data=data, db=db)
 
+
+@app.post("/user/refresh-token", tags=["Users"])
+async def token(
+   data: refresh_token.RefreshToken, 
+   db: Session = _fa.Depends(_db.get_db)
+):
+    return await refresh_token.refresh_token(data=data, db=db)
 
 # app.include_router(router)
 # origins = ["*"]

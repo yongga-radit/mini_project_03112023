@@ -17,13 +17,12 @@ async def signout(
 ):
     # check the user's refresh token 
     result = db.query(Users.UserLogin).filter(
-                Users.UserLogin == data.refresh_token)
-    
+                Users.UserLogin.refresh_token == data.refresh_token).first()
+    print(result)
     # if token not found
     if not result:
         raise _fa.HTTPException(400, 'Refresh token not found')
-    
-    db.delete(result)
-    db.commit()
 
+    db.delete(result)  
+    db.commit()
     return _fa.Response(status_code=204)
