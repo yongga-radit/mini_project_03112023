@@ -15,7 +15,7 @@ class RefreshToken(_pd.BaseModel):
     refresh_token: str
 
 
-# save the output
+# save the output 
 class RefreshTokenResponseData(_pd.BaseModel):
     access_token: str
     expired_at: int
@@ -40,10 +40,10 @@ class RefreshTokenResponse(_response.BaseResponseModel):
 
 
 async def refresh_token(
-        data: RefreshToken, 
-        db: Session, 
-        payload: dict = _fa.Depends(_auth.Authentication())
-    ):
+    data: RefreshToken, 
+    db: Session, 
+    payload = _fa.Depends(_auth.Authentication())
+):
     # check refresh token
     user_login = db.query(Users.UserLogin).filter(
                     Users.UserLogin.user_id == Users.User.id,
@@ -67,7 +67,7 @@ async def refresh_token(
                                 seconds=expired_in_seconds)
     
     user = db.query(Users.User).filter(
-                    Users.User.id == Users.UserLogin.user_id
+                    Users.User.id == user_login.user_id
                     ).first()
     # generate new access token
     payload = {

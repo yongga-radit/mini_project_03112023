@@ -8,7 +8,8 @@ from src.models import users as Users
 
 
 class LogoutData(_pd.BaseModel):
-    refresh_token: str
+    # refresh_token: str
+    user_id: int
 
 
 async def signout(
@@ -17,8 +18,8 @@ async def signout(
 ):
     # check the user's refresh token 
     result = db.query(Users.UserLogin).filter(
-                Users.UserLogin.refresh_token == data.refresh_token).first()
-    print(result)
+                Users.UserLogin.user_id == data.user_id).all()
+
     # if token not found
     if not result:
         raise _fa.HTTPException(400, 'Refresh token not found')

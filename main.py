@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.database import database as _db
 # from src.routes import router
 import sqlalchemy.orm as _orm
-from src.routes import sign_up, sign_in, sign_out, refresh_token
+from src.routes import sign_up, sign_in, sign_out, refresh_token, update_data
 from src.models import users as User
 
 # creating database
@@ -56,6 +56,15 @@ async def token(
    db: Session = _fa.Depends(_db.get_db)
 ):
     return await refresh_token.refresh_token(data=data, db=db)
+
+
+@app.post("/user/info", tags=["Users"])
+async def update_user(
+   data: update_data.UpdateUserInfo, 
+   db: Session = _fa.Depends(_db.get_db)
+):
+    return await update_data.update_info(data=data, db=db)
+
 
 # app.include_router(router)
 # origins = ["*"]
