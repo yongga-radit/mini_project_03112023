@@ -14,11 +14,10 @@ class Books(_db.Base):
     barcode = _sa.Column('barcode', _sa.String)
     author = _sa.Column('author', _sa.String)
     publisher = _sa.Column('publisher', _sa.String)
-    published_date = _sa.Column('published_date', _sa.Date)
+    edition = _sa.Column('published_date', _sa.Integer)
     availability = _sa.Column('quantity', _sa.Integer)
     created_at = _sa.Column('created_at', _sa.DateTime, default=_sa.func.now())
-    last_modified = _sa.Column('last_modified', _sa.DateTime,
-                                             default=_sa.func.NOW(), onupdate=_sa.func.NOW()))
+    last_modified = _sa.Column('last_modified', _sa.DateTime, default=_sa.func.NOW(), onupdate=_sa.func.NOW())
 
 
 class Loan(_db.Base):

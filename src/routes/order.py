@@ -19,32 +19,42 @@ class RegisterProduct(_pd.BaseModel):
     availability: int
 
 
+# to create/ edit book data
 async def register_book(
     data: RegisterProduct,
     db: Session,
     payload = _fa.Depends(_auth.Authentication())
 ):
+    
     user_id = payload.get('uid', 0)
     if user_id.user_role != 1:  # if not admin
         _fa.HTTPException('Input data only by Admin')
 
-    existed_book = db.query(_bs.Books).filter(_bs.Books.barcode == data.barcode).first()
+    existed_book = db.query(_bs.Books).filter(
+                            _bs.Books.barcode == data.barcode).first()
     if existed_book:
-        raise _fa.HTTPException(400, detail="Books is exist. Update the existed book data")
-    
-    new_book = _bs.Books(
+        existed_book(
+            title=data.book_name,
+            tag=data.tag,
+            author=data.author,
+            publisher=data.publisher,
+            edition=data.edition,
+            availability=data.availability
+        )
+    else:
+        new_book = _bs.Books(
             title=data.book_name,
             tag=data.tag,
             barcode=data.barcode,
             author=data.author,
             publisher=data.publisher,
-            published_date=data.edition,
+            edition=data.edition,
             availability=data.availability
-    )
+        )
 
-    db.add(new_book)
-    db.commit()
-    db.refresh(new_book)
+        db.add(new_book)
+        db.commit()
+        db.refresh(new_book)
 
     return _fa.Response(status_code=201)
 
@@ -61,8 +71,8 @@ class OrderInput(_pd.BaseModel):
 
 
 async def order(
-    data: OrderInput, 
-    db: Session, 
+    data: OrderInput,
+    db: Session,
     payload = _fa.Depends(_auth.Authentication())
 ):
     user_id = payload.get('uid', 0)
@@ -111,7 +121,7 @@ class ReturnBook(_pd.BaseModel):
     reference: Optional[str]
     book_id: Optional[int]
     loan_id: int
-    fine: Optional[float]
+    fine_per_day: Optional[float]
 
 
 async def return_book(
@@ -134,7 +144,7 @@ async def return_book(
 
     if book_loaned.return_date > end_date:
         days = book_loaned.return_date - end_date
-        book_loaned.fine = days * data.fine
+        book_loaned.fine = days * data.fine_per_day
     
     return _response.BaseResponseModel(
             data={   

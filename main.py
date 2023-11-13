@@ -69,22 +69,52 @@ async def update_user(
 
 
 # ------------------ BOOKS LOAN -----------------------------
-# @app.post("/books/register", tags=['Books'])
-# async def create_book(
-#    data: order.CreateBook,
-#    db: Session = _fa.Depends(_db.get_db)
-# ):
-#     return await order.register(data=data, db=db)
+@app.post("/books/register", tags=['Books'])
+async def create_book(
+   data: order.RegisterProduct,
+#    payload: _fa.Depends(_auth.Authentication()),
+   db: Session = _fa.Depends(_db.get_db)
+):
+    return await order.register_book(data=data, payload=_fa.Depends(_auth.Authentication()), db=db)
 
 
-
-@app.post("/books/order", tags=["Book"])
+@app.post("/books/order", tags=["Books"])
 async def loaned_books(
     data: order.OrderInput,
+    # payload = _fa.Depends(_auth.Authentication()),
+    db: Session = _fa.Depends(_db.get_db)
+):
+    return await order.order(data=data, db=db)
+
+
+@app.get("/books/return", tags=["Books"])
+async def return_books(
+    data: order.ReturnBook,
     payload = _fa.Depends(_auth.Authentication()),
     db: Session = _fa.Depends(_db.get_db)
 ):
-    return await order.order(data=data, payload=payload, db=db)
+    return await order.return_book(data=data, payload=payload, db=db)
+
+
+# @app.get("/books/delete", tags=["Books"], response_model=_bs.Books)
+# async def delete_books(
+#     book_id: int,
+#     payload = _fa.Depends(_auth.Authentication()),
+#     db: Session = _fa.Depends(_db.get_db)
+# ):
+#     user_id = payload.get('uid', 0)
+#     if user_id.user_role != 1:  # if not admin
+#         _fa.HTTPException('Delete data only by Admin')
+
+#     book = db.query(_bs.Books).filter(_bs.Books.id == book_id).first()
+
+#     if not book:
+#         _fa.HTTPException('Book not found')
+    
+#     db.delete(book)
+#     db.commit()
+
+#     return _fa.Response(status_code=200)
 
 
 # app.include_router(router)
