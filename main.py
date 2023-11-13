@@ -6,8 +6,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.database import database as _db
 # from src.routes import router
 import sqlalchemy.orm as _orm
-from src.routes import sign_up, sign_in, sign_out, refresh_token, update_data
-from src.models import users as User
+from src.routes import sign_up, sign_in, sign_out, refresh_token, update_data, order
+from src.models import users as User, book_stocks as _bs
+from src.depends import authentication as _auth
+
 
 # creating database
 _db.create_database()
@@ -64,6 +66,25 @@ async def update_user(
    db: Session = _fa.Depends(_db.get_db)
 ):
     return await update_data.update_info(data=data, db=db)
+
+
+# ------------------ BOOKS LOAN -----------------------------
+# @app.post("/books/register", tags=['Books'])
+# async def create_book(
+#    data: order.CreateBook,
+#    db: Session = _fa.Depends(_db.get_db)
+# ):
+#     return await order.register(data=data, db=db)
+
+
+
+@app.post("/books/order", tags=["Book"])
+async def loaned_books(
+    data: order.OrderInput,
+    payload = _fa.Depends(_auth.Authentication()),
+    db: Session = _fa.Depends(_db.get_db)
+):
+    return await order.order(data=data, payload=payload, db=db)
 
 
 # app.include_router(router)

@@ -16,7 +16,7 @@ class User(_db.Base):
     created_at = _sa.Column('created_at', _sa.DateTime, default=_sa.func.NOW())
     modified_at = _sa.Column('modified_at', _sa.DateTime,
                             default=_sa.func.NOW(), onupdate=_sa.func.NOW())
-    user_info = _sa.Column("user_info", back_populates="parent")
+    # user_info = _sa.Column("user_info", back_populates="parent")
 
 
 class UserLogin(_db.Base):
@@ -49,14 +49,14 @@ class UserInfo(_db.Base):
     __tablename__ = 'user_info'
 
     id = _sa.Column('id', _sa.Integer, primary_key=True)
-    user_id = _sa.Column(_sa.Integer, _sa.ForeignKey("users.id"))
-    # user_id = _sa.Column('user_id', _sa.Integer)
+    # user_id = _sa.Column(_sa.Integer, _sa.ForeignKey("users.id"))
+    user_id = _sa.Column('user_id', _sa.Integer)
     first_name = _sa.Column('first_name', _sa.VARCHAR(255))
     last_name = _sa.Column('last_name', _sa.VARCHAR(255))
     phone = _sa.Column('phone', _sa.CHAR(20))
     occupation = _sa.Column('occupation', _sa.VARCHAR(256))
     updated_at = _sa.Column('updated_at', _sa.DateTime,
                            default=_sa.func.NOW(), onupdate=_sa.func.NOW())
-    parent = _orm.relationship("user", back_populates="children")
+    # parent = _orm.relationship("user", back_populates="children")
     
 
