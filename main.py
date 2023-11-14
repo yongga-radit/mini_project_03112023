@@ -6,7 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.database import database as _db
 # from src.routes import router
 import sqlalchemy.orm as _orm
-from src.routes import sign_up, sign_in, sign_out, refresh_token, update_data, order
+from src.routes.authentication import sign_up, sign_in, sign_out, refresh_token, update_data
+from src.routes.order import order
 from src.models import users as User, book_stocks as _bs
 from src.depends import authentication as _auth
 

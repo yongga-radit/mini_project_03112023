@@ -73,11 +73,11 @@ class OrderInput(_pd.BaseModel):
 async def order(
     data: OrderInput,
     db: Session,
-    payload = _fa.Depends(_auth.Authentication())
+    payload= _fa.Depends(_auth.Authentication())
 ):
     user_id = payload.get('uid', 0)
-    if user_id.user_role != 1:  # if not admin
-        _fa.HTTPException('Input data only by Admin')
+    # if user_id.user_role != 1:  # if not admin
+    #     _fa.HTTPException('Input data only by Admin')
 
     customer = db.query(_u.User).filter(_u.User.id == data.customer_id).first()
     book = db.query(_bs.Books).filter(
