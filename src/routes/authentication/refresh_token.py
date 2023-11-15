@@ -6,13 +6,13 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from src.database import database as _db
 from src.models import users as Users
-from ..depends import base_response as _response, authentication as _auth
-from ..utils.generate_token import generate_access_token
-from ..config.config import config
+from src.depends import base_response as _response, authentication as _auth
+from src.utils.generate_token import generate_access_token
+from src.config.config import config
 from datetime import timedelta, datetime
 
-class RefreshToken(_pd.BaseModel):
-    refresh_token: str
+class AccessToken(_pd.BaseModel):
+    access_token: str
 
 
 # save the output 
@@ -40,7 +40,7 @@ class RefreshTokenResponse(_response.BaseResponseModel):
 
 
 async def refresh_token(
-    data: RefreshToken, 
+    data: AccessToken, 
     db: Session, 
     payload = _fa.Depends(_auth.Authentication())
 ):

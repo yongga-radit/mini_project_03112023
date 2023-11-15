@@ -13,7 +13,7 @@ class User(_db.Base):
     # 1.Admin, 2.Moderator, 3.Instructor, 4. Learners
     user_role = _sa.Column('user_role', _sa.Integer)
     password = _sa.Column('password', _sa.VARCHAR(255))
-    created_at = _sa.Column('created_at', _sa.DateTime, default=_sa.func.NOW())
+    # created_at = _sa.Column('created_at', _sa.DateTime, default=_sa.func.NOW())
     modified_at = _sa.Column('modified_at', _sa.DateTime,
                             default=_sa.func.NOW(), onupdate=_sa.func.NOW())
     # user_info = _sa.Column("user_info", back_populates="parent")

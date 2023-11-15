@@ -7,7 +7,8 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from src.database import database as _db
 from src.models import users as Users
-from ..depends import authentication as _auth
+from src.depends import authentication as _auth
+from src.utils.encryption import validate_token
 from werkzeug.security import generate_password_hash
 
 
@@ -16,7 +17,7 @@ class UpdatePassword(_pd.BaseModel):
     confirm_new_password: str
 
     @_pd.root_validator
-    def validate_new_password(cls, vals):
+    def validate_new_password(cls, vals: dict):
         password = vals.get('new_password')
         confirm_password = vals.get('confrim_new_password')
 
@@ -27,10 +28,13 @@ class UpdatePassword(_pd.BaseModel):
 async def update_password(
     # when change password on account settings
     data: UpdatePassword,
-    payload: _fa.Depends(_auth.Authentication()),
-    db: Session     
+    db: Session,
+    payload: dict = _fa.Depends(validate_token)
 ):
-    user_id = payload.get('uid', 0)
+    user_id = payload.get('uid', False)
+
+    if not user_id:
+        raise _fa.HTTPException('You must login first.')
 
     encrypted_password = generate_password_hash(data.new_password)
 

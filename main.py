@@ -1,15 +1,19 @@
 import fastapi as _fa
 import uvicorn
-from sqlalchemy.orm import Session
+import jwt
+from sqlalchemy.orm import Session, load_only
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.database import database as _db
 # from src.routes import router
 import sqlalchemy.orm as _orm
 from src.routes.authentication import sign_up, sign_in, sign_out, refresh_token, update_data
-from src.routes.order import order
+from src.routes.order import order, add_product, submit, update
 from src.models import users as User, book_stocks as _bs
 from src.depends import authentication as _auth
+from src.config import config as _config
+from src.utils.encryption import validate_token
+from src.utils.get_payload import get_payload
 
 
 # creating database
@@ -53,12 +57,12 @@ async def logout(
     return await sign_out.signout(data=data, db=db)
 
 
-@app.post("/user/refresh-token", tags=["Users"])
-async def token(
-   data: refresh_token.RefreshToken, 
-   db: Session = _fa.Depends(_db.get_db)
-):
-    return await refresh_token.refresh_token(data=data, db=db)
+# @app.post("/user/refresh-token", tags=["Users"])
+# async def token(
+#    data: refresh_token.RefreshToken, 
+#    db: Session = _fa.Depends(_db.get_db)
+# ):
+#     return await refresh_token.refresh_token(data=data, db=db)
 
 
 @app.post("/user/info", tags=["Users"])
@@ -69,32 +73,74 @@ async def update_user(
     return await update_data.update_info(data=data, db=db)
 
 
+# ------------------ VALIDATE TOKEN -----------------------------
+@app.get("/token/validate", tags=["token"])
+async def validate_access_token(
+    token: str,
+    db: Session = _fa.Depends(_db.get_db)
+) -> dict:
+    try:
+        decoded_data = jwt.decode(token, _config.config.PRIVATE_KEY, ['HS256'])
+        uid = decoded_data['uid']
+        email = decoded_data['email']
+
+        user = db.query(User.User).filter(User.User.id == uid).first()
+        # user = db.query(User.User).options(load_only('name')).filter(User.User.id == uid).first()
+        # return user
+        return {
+                "user_id": uid,
+                "name": user.name,
+                "email": email
+                }
+    except jwt.ExpiredSignatureError:
+        return {"message": "Token has expired"}
+    except jwt.InvalidSignatureError:
+        return {"message": "Signature verification failed"}
+    except jwt.InvalidTokenError:
+        return {"message": "Invalid token"}
+
+
 # ------------------ BOOKS LOAN -----------------------------
 @app.post("/books/register", tags=['Books'])
 async def create_book(
-   data: order.RegisterProduct,
-#    payload: _fa.Depends(_auth.Authentication()),
+   data: add_product.RegisterProduct,
+   payload: dict = _fa.Depends(validate_token),
    db: Session = _fa.Depends(_db.get_db)
 ):
-    return await order.register_book(data=data, payload=_fa.Depends(_auth.Authentication()), db=db)
+    return await add_product.register_book(data=data, payload=payload, db=db)
 
 
 @app.post("/books/order", tags=["Books"])
 async def loaned_books(
-    data: order.OrderInput,
-    # payload = _fa.Depends(_auth.Authentication()),
+    payload: dict = _fa.Depends(validate_token),
     db: Session = _fa.Depends(_db.get_db)
 ):
-    return await order.order(data=data, db=db)
+    return await order.order(payload=payload, db=db)
 
 
-@app.get("/books/return", tags=["Books"])
+@app.get("/books/check-status", tags=["Books"])
+async def check_status(
+    payload: dict = _fa.Depends(validate_token),
+    db: Session = _fa.Depends(_db.get_db)
+):
+    return await submit.check_status(payload=payload, db=db)
+
+
+@app.put("/books/post", tags=["Books"])
+async def post_loan(
+    payload: dict = _fa.Depends(validate_token),
+    db: Session = _fa.Depends(_db.get_db)
+):
+    return await submit.post(payload=payload, db=db)
+
+
+@app.put("/books/return", tags=["Books"])
 async def return_books(
-    data: order.ReturnBook,
-    payload = _fa.Depends(_auth.Authentication()),
+    loan_id: int,
+    payload: dict = _fa.Depends(validate_token),
     db: Session = _fa.Depends(_db.get_db)
 ):
-    return await order.return_book(data=data, payload=payload, db=db)
+    return await update.return_book(loan_id=loan_id, payload=payload, db=db)
 
 
 # @app.get("/books/delete", tags=["Books"], response_model=_bs.Books)
