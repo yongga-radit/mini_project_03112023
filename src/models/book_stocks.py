@@ -32,10 +32,10 @@ class Loan(_db.Base):
     user_id = _sa.Column('user_id', _sa.Integer)
     # booking_reference = _sa.Column('reference', _sa.String)
     user_name = _sa.Column('name', _sa.String)
-    loan_date = _sa.Column('loan_date', _sa.Date, default=_sa.func.NOW())
+    loan_date = _sa.Column('loan_date', _sa.Date)
     duration = _sa.Column('duration', _sa.Integer, default=7)
     return_date = _sa.Column('return_date', _sa.Date)
-    status = _sa.Column('status', _sa.String)
+    status = _sa.Column('status', _sa.String)  # pending, confirmed, canceled, returned
     fine = _sa.Column('fine', _sa.FLOAT, default=0)
     amount = _sa.Column('amount', _sa.Integer, default=1)
 

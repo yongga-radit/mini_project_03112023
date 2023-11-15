@@ -2,20 +2,19 @@ import sqlalchemy as _sa
 import pydantic as _pd
 import fastapi as _fa
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from sqlalchemy.orm import Session
 from src.models import book_stocks as _bs, users as _u
 from src.depends import base_response as _response, authentication as _auth
 from typing_extensions import Optional, List
 
 
-async def check_status(loan_id: int, payload: dict, db: Session):  # by borrower
+async def check_status(payload: dict, db: Session):  # by borrower
     user_id = payload.get("uid", False)
-    loan = db.query(_bs.Loan).filter(_bs.Loan.id == loan_id and _bs.Loan.user_id == user_id).first()
+    loan = db.query(_bs.Loan).filter(_bs.Loan.user_id == user_id).all()
     return {
                 "user_id": user_id,
-                "loan_id": loan.id,
-                "status": loan.status
+                "loans": loan
             }
 
 
@@ -34,7 +33,11 @@ async def post(loan_id: int, is_confirmed: bool, payload: dict, db: Session):  #
         loan.status = "confirmed"
     else:
         loan.status = "rejected"
-    loan.loan_date = datetime.now()
+
+    loan.loan_date = datetime.now().date()
+    
+    db.commit()
+    
     return {
                 "user_id": user_id,
                 "loan_id": loan_id,

@@ -112,10 +112,12 @@ async def create_book(
 
 @app.post("/books/order", tags=["Books"])
 async def loaned_books(
+    book_id: int,
+    amount: int = 1,
     payload: dict = _fa.Depends(validate_token),
     db: Session = _fa.Depends(_db.get_db)
 ):
-    return await order.order(payload=payload, db=db)
+    return await order.order(book_id=book_id, amount=amount, payload=payload, db=db)
 
 
 @app.get("/books/check-status", tags=["Books"])
@@ -128,19 +130,22 @@ async def check_status(
 
 @app.put("/books/post", tags=["Books"])
 async def post_loan(
+    loan_id: int,
     payload: dict = _fa.Depends(validate_token),
+    is_confirmed: bool = True,
     db: Session = _fa.Depends(_db.get_db)
 ):
-    return await submit.post(payload=payload, db=db)
+    return await submit.post(loan_id=loan_id, is_confirmed=is_confirmed, payload=payload, db=db)
 
 
 @app.put("/books/return", tags=["Books"])
 async def return_books(
     loan_id: int,
+    fine_per_day: float,
     payload: dict = _fa.Depends(validate_token),
     db: Session = _fa.Depends(_db.get_db)
 ):
-    return await update.return_book(loan_id=loan_id, payload=payload, db=db)
+    return await update.return_book(loan_id=loan_id, fine_per_day=fine_per_day, payload=payload, db=db)
 
 
 # @app.get("/books/delete", tags=["Books"], response_model=_bs.Books)
