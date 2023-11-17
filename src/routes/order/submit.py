@@ -9,9 +9,10 @@ from src.depends import base_response as _response, authentication as _auth
 from typing_extensions import Optional, List
 
 
-async def check_status(payload: dict, db: Session):  # by borrower
+async def check_status(loan_id: int, payload: dict, db: Session):  # by borrower
     user_id = payload.get("uid", False)
-    loan = db.query(_bs.Loan).filter(_bs.Loan.user_id == user_id).all()
+    loan = db.query(_bs.Loan).filter(
+                    _bs.Loan.user_id == user_id and _bs.Loan.id == loan_id).first()
     return {
                 "user_id": user_id,
                 "loans": loan
@@ -22,12 +23,12 @@ async def post(loan_id: int, is_confirmed: bool, payload: dict, db: Session):  #
     user_id = payload.get("uid", False)
     admin = db.query(_u.User).filter(_u.User.id == user_id).first()
     if admin.user_role != 1:
-        _fa.HTTPException(400, detail="Input must by Admin")
+        raise _fa.HTTPException(400, detail="Input must by Admin")
     
     loan = db.query(_bs.Loan).filter(_bs.Loan.id == loan_id).first()
 
     if not loan_id:
-        _fa.HTTPException(400, detail="Loan not found")
+        raise _fa.HTTPException(400, detail="Loan not found")
     
     if is_confirmed: 
         loan.status = "confirmed"

@@ -20,11 +20,12 @@ async def order(
     
     existed_book = db.query(_bs.Books).filter(
                                     _bs.Books.id == book_id).first()
-    
-    if not existed_book:
-        _fa.HTTPException(400, detail="Sorry book is not found")
-    if existed_book.availability == 0:
-        _fa.HTTPException(400, detail="Book has been borrowed")
+
+    if existed_book is None:
+        raise _fa.HTTPException(400, detail="Sorry book is not found")
+    leftover = existed_book.availability - amount
+    if leftover <= -1:
+        raise _fa.HTTPException(400, detail="Book has been borrowed")
     existed_book.availability -= amount
 
     db.commit()

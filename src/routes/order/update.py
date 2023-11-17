@@ -16,15 +16,13 @@ async def return_book(
     fine_per_day: float = 5000.0
 ):
     user_id = payload.get('uid', False)
-    # if user_id.user_role != 1:  # if not admin
-    #     _fa.HTTPException('Input data only by Admin')
-    
+
     loan = db.query(_bs.Loan).filter(
                                 _bs.Loan.id == loan_id and _bs.Loan.user_id == user_id).first()
 
     if not loan:
         raise _fa.HTTPException('Data not found')
-    
+
     end_date = loan.loan_date + timedelta(days=loan.duration)
     loan.return_date = datetime.now().date()
 

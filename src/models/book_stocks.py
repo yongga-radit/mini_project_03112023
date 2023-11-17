@@ -15,7 +15,7 @@ class Books(_db.Base):
     author = _sa.Column('author', _sa.String)
     publisher = _sa.Column('publisher', _sa.String)
     edition = _sa.Column('published_date', _sa.Integer)
-    availability = _sa.Column('quantity', _sa.Integer)
+    availability = _sa.Column('availability', _sa.Integer)
     created_at = _sa.Column('created_at', _sa.DateTime, default=_sa.func.NOW())
     last_modified = _sa.Column('last_modified', _sa.DateTime, default=_sa.func.NOW(), onupdate=_sa.func.NOW())
 

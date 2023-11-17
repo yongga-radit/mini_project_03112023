@@ -60,8 +60,8 @@ class UpdateUserInfo(_pd.BaseModel):
 
 async def update_info(
     data: UpdateUserInfo,
-    payload: _fa.Depends(_auth.Authentication()),
-    db: Session
+    db: Session,
+    payload: dict = _fa.Depends(validate_token)
 ):
     user_id = payload.get('uid', 0)
 

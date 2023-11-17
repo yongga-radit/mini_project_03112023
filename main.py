@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.database import database as _db
 # from src.routes import router
 import sqlalchemy.orm as _orm
-from src.routes.authentication import sign_up, sign_in, sign_out, refresh_token, update_data
+from src.routes.authentication import sign_up, sign_in, sign_out, update_data
 from src.routes.order import order, add_product, submit, update
 from src.models import users as User, book_stocks as _bs
 from src.depends import authentication as _auth
@@ -21,11 +21,11 @@ _db.create_database()
 
 # run the program
 if __name__ == '__main__':
-  uvicorn.run(
-    'app:app',
-    host="127.0.0.1",
-    port=8000,
-    reload=True
+    uvicorn.run(
+        'app:app',
+        host="127.0.0.1",
+        port=8000,
+        reload=True
   )
 
 app = _fa.FastAPI(
@@ -51,10 +51,11 @@ async def login(
 
 @app.post("/user/sign-out", tags=["Users"])
 async def logout(
-   data: sign_out.LogoutData, 
-   db: Session = _fa.Depends(_db.get_db)
+    access_token: str,
+    db: Session = _fa.Depends(_db.get_db)
+#    payload: dict = _fa.Depends(validate_token), 
 ):
-    return await sign_out.signout(data=data, db=db)
+    return await sign_out.signout(access_token=access_token, db=db)
 
 
 # @app.post("/user/refresh-token", tags=["Users"])
@@ -68,10 +69,18 @@ async def logout(
 @app.post("/user/info", tags=["Users"])
 async def update_user(
    data: update_data.UpdateUserInfo, 
+   payload: dict = _fa.Depends(validate_token),
    db: Session = _fa.Depends(_db.get_db)
 ):
-    return await update_data.update_info(data=data, db=db)
+    return await update_data.update_info(data=data, payload=payload, db=db)
 
+@app.post("/user/reset/password", tags=["User"])
+async def reset_password(
+    data: update_data.UpdatePassword,
+    payload: dict = _fa.Depends(validate_token),
+    db: Session = _fa.Depends(_db.get_db)
+):
+    return await update_data.update_password(data=data, payload=payload, db=db)
 
 # ------------------ VALIDATE TOKEN -----------------------------
 @app.get("/token/validate", tags=["token"])
@@ -86,7 +95,6 @@ async def validate_access_token(
 
         user = db.query(User.User).filter(User.User.id == uid).first()
         # user = db.query(User.User).options(load_only('name')).filter(User.User.id == uid).first()
-        # return user
         return {
                 "user_id": uid,
                 "name": user.name,
@@ -148,25 +156,25 @@ async def return_books(
     return await update.return_book(loan_id=loan_id, fine_per_day=fine_per_day, payload=payload, db=db)
 
 
-# @app.get("/books/delete", tags=["Books"], response_model=_bs.Books)
-# async def delete_books(
-#     book_id: int,
-#     payload = _fa.Depends(_auth.Authentication()),
-#     db: Session = _fa.Depends(_db.get_db)
-# ):
-#     user_id = payload.get('uid', 0)
-#     if user_id.user_role != 1:  # if not admin
-#         _fa.HTTPException('Delete data only by Admin')
+@app.get("/books/delete", tags=["Books"], response_model=_bs.Books)
+async def delete_books(
+    book_id: int,
+    payload: dict = _fa.Depends(_auth.Authentication()),
+    db: Session = _fa.Depends(_db.get_db)
+):
+    user_id = payload.get('uid', 0)
+    if user_id.user_role != 1:  # if not admin
+        raise _fa.HTTPException('Delete data only by Admin')
 
-#     book = db.query(_bs.Books).filter(_bs.Books.id == book_id).first()
+    book = db.query(_bs.Books).filter(_bs.Books.id == book_id).first()
 
-#     if not book:
-#         _fa.HTTPException('Book not found')
+    if not book:
+        raise _fa.HTTPException('Book not found')
     
-#     db.delete(book)
-#     db.commit()
+    db.delete(book)
+    db.commit()
 
-#     return _fa.Response(status_code=200)
+    return _fa.Response(status_code=200)
 
 
 # app.include_router(router)

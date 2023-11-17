@@ -26,12 +26,13 @@ TOKEN = APIKeyHeader(name='Authorization')
 
 def validate_token(token: str = Depends(TOKEN)) -> dict:
     try:
-        decoded_data = jwt.decode(token, _config.config.PRIVATE_KEY, ['HS256'])
-
+        decoded_data = jwt.decode(
+            token, _config.config.PRIVATE_KEY, ['HS256']
+        )
         return decoded_data
     except jwt.ExpiredSignatureError:
         return {"message": "Token has expired"}
     except jwt.InvalidSignatureError:
         return {"message": "Signature verification failed"}
-    except jwt.InvalidTokenError:
-        return {"message": "Invalid token"}
+    except jwt.InvalidTokenError as e:
+        return {"message": f"Invalid token. Details: {str(e)}"}
