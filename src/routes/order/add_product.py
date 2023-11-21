@@ -22,26 +22,26 @@ class RegisterProduct(_pd.BaseModel):
 async def register_book(
     data: RegisterProduct,
     db: Session,
-    payload: dict = _fa.Depends(_auth.Authentication())
+    payload: dict
 ):
     user_id = payload.get('uid', False)
 
     admin = db.query(_u.User).filter(_u.User.id == user_id).first()
-
-    if admin.user_role != 0:
-        _fa.HTTPException(400, detail='Input data only by Admin')
-
+    if admin.user_role != 1:
+        raise _fa.HTTPException(400, detail='Input data only by Admin')
     existed_book = db.query(_bs.Books).filter(
                             _bs.Books.barcode == data.barcode).first()
     if existed_book:
-        existed_book.title = data.book_name,
-        existed_book.tag = data.tag,
-        existed_book.author = data.author,
-        existed_book.publisher = data.publisher,
-        existed_book.edition = data.edition,
+        existed_book.title = data.book_name
+        existed_book.tag = data.tag
+        existed_book.author = data.author
+        existed_book.publisher = data.publisher
+        existed_book.edition = data.edition
         existed_book.availability = data.availability
+        # return existed_book
 
         db.commit()
+        db.refresh(existed_book)
     else:
         new_book = _bs.Books(
             title=data.book_name,

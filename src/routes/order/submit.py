@@ -9,10 +9,15 @@ from src.depends import base_response as _response, authentication as _auth
 from typing_extensions import Optional, List
 
 
-async def check_status(loan_id: int, payload: dict, db: Session):  # by borrower
+async def check_status(loan_id: Optional[int], payload: dict, db: Session):  # by borrower
     user_id = payload.get("uid", False)
-    loan = db.query(_bs.Loan).filter(
-                    _bs.Loan.user_id == user_id and _bs.Loan.id == loan_id).first()
+    if loan_id:
+        loan = db.query(_bs.Loan).filter(
+                        (_bs.Loan.user_id == user_id), (_bs.Loan.id == loan_id)
+                        ).first()
+    else: 
+        loan = db.query(_bs.Loan).filter(
+                        _bs.Loan.user_id == user_id).all()
     return {
                 "user_id": user_id,
                 "loans": loan

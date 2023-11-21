@@ -55,9 +55,11 @@ async def signin(data: LoginData, db: Session):
     current_time = _sa.func.now()
 
     # check if the user already login before by checking the token
+    access_token, access_token_expired_at = generate_access_token(payload)
     refresh_token = generate_refresh_token(payload)
     user_signin = Users.UserLogin(
         user_id=user.id,
+        access_token=access_token,
         refresh_token=refresh_token,
         expired_at=current_time + timedelta(seconds=expired_in_seconds)
         # expired_at=_sa.func.TIMESTAMPADD(
@@ -70,7 +72,6 @@ async def signin(data: LoginData, db: Session):
     db.add(user_signin)
     db.commit()
     
-    access_token, access_token_expired_at = generate_access_token(payload)
 
     # inject token to user login response model
     return LoginResponseModel(

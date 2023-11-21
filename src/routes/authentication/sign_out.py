@@ -9,14 +9,16 @@ from src.models import users as Users
 
 async def signout(
     # payload: dict,
-    access_token: str,
+    payload: dict,
     db: Session
 ):
     # user_id = payload.get("uid", False)
-    
+    # return payload
+    user_id = payload.get('uid', False)
+    expired_at = payload.get('', False)
     # check the user's refresh token 
     result = db.query(Users.UserLogin).filter(
-                Users.UserLogin.access_token == access_token).first()
+                Users.UserLogin.access_token == str(access_token)).first()
     # result = db.query(Users.UserLogin).filter(
     #             Users.UserLogin.user_id == int(user_id).all()
 

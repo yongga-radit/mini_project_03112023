@@ -3,17 +3,16 @@ import uvicorn
 import jwt
 from sqlalchemy.orm import Session, load_only
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Optional
 
 from src.database import database as _db
 # from src.routes import router
-import sqlalchemy.orm as _orm
 from src.routes.authentication import sign_up, sign_in, sign_out, update_data
 from src.routes.order import order, add_product, submit, update
 from src.models import users as User, book_stocks as _bs
 from src.depends import authentication as _auth
 from src.config import config as _config
 from src.utils.encryption import validate_token
-from src.utils.get_payload import get_payload
 
 
 # creating database
@@ -51,11 +50,11 @@ async def login(
 
 @app.post("/user/sign-out", tags=["Users"])
 async def logout(
-    access_token: str,
-    db: Session = _fa.Depends(_db.get_db)
-#    payload: dict = _fa.Depends(validate_token), 
+    # access_token: str,
+    db: Session = _fa.Depends(_db.get_db),
+    payload: dict = _fa.Depends(validate_token)
 ):
-    return await sign_out.signout(access_token=access_token, db=db)
+    return await sign_out.signout(payload=payload, db=db)
 
 
 # @app.post("/user/refresh-token", tags=["Users"])
@@ -130,10 +129,11 @@ async def loaned_books(
 
 @app.get("/books/check-status", tags=["Books"])
 async def check_status(
+    loan_id: Optional[int],
     payload: dict = _fa.Depends(validate_token),
     db: Session = _fa.Depends(_db.get_db)
 ):
-    return await submit.check_status(payload=payload, db=db)
+    return await submit.check_status(loan_id=loan_id, payload=payload, db=db)
 
 
 @app.put("/books/post", tags=["Books"])
@@ -156,7 +156,7 @@ async def return_books(
     return await update.return_book(loan_id=loan_id, fine_per_day=fine_per_day, payload=payload, db=db)
 
 
-@app.get("/books/delete", tags=["Books"], response_model=_bs.Books)
+@app.get("/books/delete", tags=["Books"])
 async def delete_books(
     book_id: int,
     payload: dict = _fa.Depends(_auth.Authentication()),
