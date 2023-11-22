@@ -8,9 +8,9 @@ from typing import Optional
 from src.database import database as _db
 # from src.routes import router
 from src.routes.authentication import sign_up, sign_in, sign_out, update_data
-from src.routes.order import order, add_product, submit, update
+from src.routes.order import order, add_product, submit, update, delete
 from src.models import users as User, book_stocks as _bs
-from src.depends import authentication as _auth
+from src.depends import authentication as _auth, authorization as _author
 from src.config import config as _config
 from src.utils.encryption import validate_token
 
@@ -42,7 +42,7 @@ async def registration(
 
 @app.post("/user/sign-in", tags=["Users"])
 async def login(
-    data: sign_in.LoginData, 
+    data: sign_in.LoginData,
     db: Session = _fa.Depends(_db.get_db)
 ):
     return await sign_in.signin(data=data, db=db)
@@ -80,6 +80,7 @@ async def reset_password(
     db: Session = _fa.Depends(_db.get_db)
 ):
     return await update_data.update_password(data=data, payload=payload, db=db)
+
 
 # ------------------ VALIDATE TOKEN -----------------------------
 @app.get("/token/validate", tags=["token"])
@@ -139,11 +140,16 @@ async def check_status(
 @app.put("/books/post", tags=["Books"])
 async def post_loan(
     loan_id: int,
-    payload: dict = _fa.Depends(validate_token),
     is_confirmed: bool = True,
+    payload: dict = _fa.Depends(validate_token),
     db: Session = _fa.Depends(_db.get_db)
 ):
-    return await submit.post(loan_id=loan_id, is_confirmed=is_confirmed, payload=payload, db=db)
+    return await submit.post(
+                    loan_id=loan_id,
+                    is_confirmed=is_confirmed,
+                    payload=payload,
+                    db=db
+                )
 
 
 @app.put("/books/return", tags=["Books"])
@@ -156,26 +162,32 @@ async def return_books(
     return await update.return_book(loan_id=loan_id, fine_per_day=fine_per_day, payload=payload, db=db)
 
 
-@app.get("/books/delete", tags=["Books"])
+@app.delete("/books/delete", tags=["Books"])
 async def delete_books(
     book_id: int,
-    payload: dict = _fa.Depends(_auth.Authentication()),
+    payload: dict = _fa.Depends(validate_token),
     db: Session = _fa.Depends(_db.get_db)
 ):
-    user_id = payload.get('uid', 0)
-    if user_id.user_role != 1:  # if not admin
-        raise _fa.HTTPException('Delete data only by Admin')
+    # user_id = payload.get('uid', 0)
+    # if user_id.user_role != 1:  # if not admin
+    #     raise _fa.HTTPException('Delete data only by Admin')
 
-    book = db.query(_bs.Books).filter(_bs.Books.id == book_id).first()
+    # book = db.query(_bs.Books).filter(_bs.Books.id == book_id).first()
 
-    if not book:
-        raise _fa.HTTPException('Book not found')
+    # if not book:
+    #     raise _fa.HTTPException('Book not found')
     
-    db.delete(book)
-    db.commit()
+    # db.delete(book)
+    # db.commit()
+    return await delete.delete_product(book_id=book_id, payload=payload, db=db)
 
-    return _fa.Response(status_code=200)
-
+@app.delete("/books/loan-delete", tags=["Books"])
+async def delete_loan(
+    loan_id: int,
+    payload: dict = _fa.Depends(validate_token),
+    db: Session = _fa.Depends(_db.get_db)
+):
+    return await delete.delete_loan(loan_id=loan_id, payload=payload, db=db)
 
 # app.include_router(router)
 # origins = ["*"]

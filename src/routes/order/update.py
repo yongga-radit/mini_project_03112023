@@ -18,7 +18,7 @@ async def return_book(
     user_id = payload.get('uid', False)
 
     loan = db.query(_bs.Loan).filter(
-                                _bs.Loan.id == loan_id and _bs.Loan.user_id == user_id).first()
+                                (_bs.Loan.id == loan_id), (_bs.Loan.user_id == user_id)).first()
 
     if not loan:
         raise _fa.HTTPException('Data not found')

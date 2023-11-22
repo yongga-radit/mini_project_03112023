@@ -18,6 +18,7 @@ class Books(_db.Base):
     availability = _sa.Column('availability', _sa.Integer)
     created_at = _sa.Column('created_at', _sa.DateTime, default=_sa.func.NOW())
     last_modified = _sa.Column('last_modified', _sa.DateTime, default=_sa.func.NOW(), onupdate=_sa.func.NOW())
+    is_delete = _sa.Column('is_delete', _sa.Boolean, default=False)
 
     # loan = _orm.relationship("Loan", back_populates="book")
 

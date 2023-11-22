@@ -19,7 +19,8 @@ async def order(
     customer = db.query(_u.User).filter(_u.User.id == user_id).first()
     
     existed_book = db.query(_bs.Books).filter(
-                                    _bs.Books.id == book_id).first()
+                                    (_bs.Books.id == book_id)
+                                    ).first()
 
     if existed_book is None:
         raise _fa.HTTPException(400, detail="Sorry book is not found")

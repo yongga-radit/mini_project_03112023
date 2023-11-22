@@ -15,7 +15,7 @@ async def check_status(loan_id: Optional[int], payload: dict, db: Session):  # b
         loan = db.query(_bs.Loan).filter(
                         (_bs.Loan.user_id == user_id), (_bs.Loan.id == loan_id)
                         ).first()
-    else: 
+    else:
         loan = db.query(_bs.Loan).filter(
                         _bs.Loan.user_id == user_id).all()
     return {
@@ -24,13 +24,19 @@ async def check_status(loan_id: Optional[int], payload: dict, db: Session):  # b
             }
 
 
-async def post(loan_id: int, is_confirmed: bool, payload: dict, db: Session):  # by admin
+async def post(
+    loan_id: int,
+    is_confirmed: bool,
+    payload: dict,
+    db: Session
+):  # by admin
     user_id = payload.get("uid", False)
+
     admin = db.query(_u.User).filter(_u.User.id == user_id).first()
     if admin.user_role != 1:
         raise _fa.HTTPException(400, detail="Input must by Admin")
-    
     loan = db.query(_bs.Loan).filter(_bs.Loan.id == loan_id).first()
+    book = db.query(_bs.Books).filter(_bs.Books.id == loan.book_id).first()
 
     if not loan_id:
         raise _fa.HTTPException(400, detail="Loan not found")
@@ -39,11 +45,12 @@ async def post(loan_id: int, is_confirmed: bool, payload: dict, db: Session):  #
         loan.status = "confirmed"
     else:
         loan.status = "rejected"
-
+        book.availability += loan.amount
+        
     loan.loan_date = datetime.now().date()
     
     db.commit()
-    
+
     return {
                 "user_id": user_id,
                 "loan_id": loan_id,
