@@ -85,27 +85,17 @@ async def reset_password(
 # ------------------ VALIDATE TOKEN -----------------------------
 @app.get("/token/validate", tags=["token"])
 async def validate_access_token(
-    token: str,
+    payload: dict = _fa.Depends(validate_token),
     db: Session = _fa.Depends(_db.get_db)
 ) -> dict:
-    try:
-        decoded_data = jwt.decode(token, _config.config.PRIVATE_KEY, ['HS256'])
-        uid = decoded_data['uid']
-        email = decoded_data['email']
-
-        user = db.query(User.User).filter(User.User.id == uid).first()
-        # user = db.query(User.User).options(load_only('name')).filter(User.User.id == uid).first()
-        return {
-                "user_id": uid,
-                "name": user.name,
-                "email": email
-                }
-    except jwt.ExpiredSignatureError:
-        return {"message": "Token has expired"}
-    except jwt.InvalidSignatureError:
-        return {"message": "Signature verification failed"}
-    except jwt.InvalidTokenError:
-        return {"message": "Invalid token"}
+    uid = payload.get('uid', '')
+    email = payload.get('email', '')
+    user = db.query(User.User).filter(User.User.id == uid).first()
+    return {
+            "user_id": uid,
+            "name": user.name,
+            "email": email
+            }
 
 
 # ------------------ BOOKS LOAN -----------------------------
