@@ -12,7 +12,7 @@ async def delete_product(book_id: int, payload: dict, db: Session):
     user_id = payload.get("uid", 0)
     admin = db.query(_u.User).filter(_u.User.id == user_id).first()
     if admin.user_role != 1:
-        _fa.HTTPException(400, detail="Input only by Admin")
+        raise _fa.HTTPException(400, detail="Input only by Admin")
 
     book = db.query(_bs.Books).filter(_bs.Books.id == book_id).first()
 
@@ -32,7 +32,7 @@ async def delete_loan(loan_id: int, payload: dict, db: Session):
     user_id = payload.get("uid", 0)
     admin = db.query(_u.User).filter(_u.User.id == user_id).first()
     if admin.user_role != 1:
-        _fa.HTTPException(400, detail="Input only by Admin")
+        raise _fa.HTTPException(400, detail="Input only by Admin")
 
     loan = db.query(_bs.Loan).filter(_bs.Loan.id == loan_id).first()
 
