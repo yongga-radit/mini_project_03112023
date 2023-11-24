@@ -12,9 +12,11 @@ from typing_extensions import Optional, List
 async def return_book(
     loan_id: int,
     db: Session,
+    # date: date,
     payload: dict,
     fine_per_day: float = 5000.0
 ):
+    # return payload
     user_id = payload.get('uid', False)
 
     loan = db.query(_bs.Loan).filter(
@@ -24,7 +26,8 @@ async def return_book(
         raise _fa.HTTPException('Data not found')
 
     end_date = loan.loan_date + timedelta(days=loan.duration)
-    loan.return_date = datetime.now().date()
+    loan.return_date = datetime.now().date() + timedelta(days=10)
+    # loan.return_date = date
 
     if loan.return_date > end_date:
         days = loan.return_date - end_date

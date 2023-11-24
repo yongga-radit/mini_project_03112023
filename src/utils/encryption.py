@@ -31,8 +31,8 @@ def validate_token(token: str = Depends(TOKEN)) -> dict:
         )
         return decoded_data
     except jwt.ExpiredSignatureError:
-        return {"message": "Token has expired"}
+        raise _fa.HTTPException(400, detail="Token has expired")
     except jwt.InvalidSignatureError:
-        return {"message": "Signature verification failed"}
+        raise _fa.HTTPException(400, detail="Signature verification failed")
     except jwt.InvalidTokenError as e:
-        return {"message": f"Invalid token. Details: {str(e)}"}
+        raise _fa.HTTPException(400, detail=f"Invalid token. Details: {str(e)}")

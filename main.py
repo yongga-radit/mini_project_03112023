@@ -1,3 +1,4 @@
+import datetime
 import fastapi as _fa
 import uvicorn
 import jwt
@@ -146,6 +147,7 @@ async def post_loan(
 async def return_books(
     loan_id: int,
     fine_per_day: float,
+    # return_date: datetime.date = datetime(2023, 12, 10),
     payload: dict = _fa.Depends(validate_token),
     db: Session = _fa.Depends(_db.get_db)
 ):
