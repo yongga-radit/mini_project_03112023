@@ -2,7 +2,7 @@ import sqlalchemy as _sa
 import sqlalchemy.ext.declarative as _declare
 import sqlalchemy.orm as _orm
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./database_minipro.db"
+SQLALCHEMY_DATABASE_URL = "mysql+aiomysql://user:password@localhost/database_minipro27112023.db"
 
 engine = _sa.create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}

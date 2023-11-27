@@ -13,7 +13,7 @@ from src.database import database as _db
 
 from sqlalchemy.orm import Session
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from fastapi.security import APIKeyHeader
 from fastapi.encoders import jsonable_encoder
 from src.utils.get_payload import get_payload
@@ -26,8 +26,12 @@ TOKEN = APIKeyHeader(name='Authorization')
 
 def validate_token(token: str = Depends(TOKEN)) -> dict:
     try:
+        token.split('')
+        if token[0] != 'Basic':
+            _fa.HTTPException(400, detail="Token Invalid")
+        
         decoded_data = jwt.decode(
-            token, _config.config.PRIVATE_KEY, ['HS256']
+            token[1], _config.config.PRIVATE_KEY, ['HS256']
         )
         return decoded_data
     except jwt.ExpiredSignatureError:
