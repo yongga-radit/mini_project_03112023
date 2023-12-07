@@ -1,7 +1,0 @@
-.env
-.pycache
-
-/env
-/pycache
-database_minipro.db
-**/__pycache__/

@@ -8,4 +8,3 @@ class BaseResponseModel(_pd.BaseModel):
     success: bool = True
     code: int = 200
     message: str = 'Success'
-

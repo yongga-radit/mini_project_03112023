@@ -8,9 +8,9 @@ from typing import Optional
 
 from src.database import database as _db
 # from src.routes import router
-from src.routes.authentication import sign_up, sign_in, sign_out, update_data
-from src.routes.order import order, add_product, submit, update, delete
-from src.models import users as User, book_stocks as _bs
+from src.routes.v1.authentication import sign_up, sign_in, sign_out, update_data
+from src.routes.v1.order import order, add_product, submit, update, delete
+from src.models import users as User, book_stocks
 from src.depends import authentication as _auth, authorization as _author
 from src.config import config as _config
 from src.utils.encryption import validate_token
@@ -20,18 +20,28 @@ from src.utils.encryption import validate_token
 _db.create_database()
 
 # run the program
+# router = _fa.APIRouter()
+
+# router.add_api_route('/user/sign-up', sign_up.signup,
+#                      methods=['POST'], tags=['Users'])
+# router.add_api_route('/user/sign-in', sign_in.signin,
+#                      methods=['POST'], tags=['Users'])
+# router.add_api_route('/user/sign-out', sign_out.signout,
+#                      methods=['POST'], tags=['Users'])
+
 if __name__ == '__main__':
     uvicorn.run(
         'app:app',
         host="127.0.0.1",
         port=8000,
         reload=True
-  )
+    )
 
 app = _fa.FastAPI(
   title='Mini Project 03/11/2023',
 )
 
+# app.include_router(router)
 
 @app.post("/user/sign-up", tags=["Users"])
 async def registration(
@@ -58,14 +68,6 @@ async def logout(
     return await sign_out.signout(payload=payload, db=db)
 
 
-# @app.post("/user/refresh-token", tags=["Users"])
-# async def token(
-#    data: refresh_token.RefreshToken, 
-#    db: Session = _fa.Depends(_db.get_db)
-# ):
-#     return await refresh_token.refresh_token(data=data, db=db)
-
-
 @app.post("/user/info", tags=["Users"])
 async def update_user(
    data: update_data.UpdateUserInfo, 
@@ -73,6 +75,7 @@ async def update_user(
    db: Session = _fa.Depends(_db.get_db)
 ):
     return await update_data.update_info(data=data, payload=payload, db=db)
+
 
 @app.post("/user/reset/password", tags=["User"])
 async def reset_password(
@@ -173,6 +176,7 @@ async def delete_books(
     # db.commit()
     return await delete.delete_product(book_id=book_id, payload=payload, db=db)
 
+
 @app.delete("/books/loan-delete", tags=["Books"])
 async def delete_loan(
     loan_id: int,
@@ -181,12 +185,12 @@ async def delete_loan(
 ):
     return await delete.delete_loan(loan_id=loan_id, payload=payload, db=db)
 
-# app.include_router(router)
-# origins = ["*"]
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=origins,
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"]
-# )
+
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)

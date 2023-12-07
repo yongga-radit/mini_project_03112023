@@ -8,9 +8,9 @@ class _Config(BaseSettings):
 
     ACCESS_TOKEN_EXPIRATION: int = 24 * 60 * 60
     REFRESH_TOKEN_EXPIRATION: int = 30 * 24 * 60 * 60
-    PRIVATE_KEY: str 
-    PUBLIC_KEY: str 
-    REFRESH_PRIVATE_KEY: str 
+    PRIVATE_KEY: str
+    PUBLIC_KEY: str
+    REFRESH_PRIVATE_KEY: str
 
     class Config:
         env_file = '.env'

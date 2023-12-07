@@ -1,0 +1,7 @@
+.env
+.pycache
+
+/venv
+/pycache
+database_minipro.db
+**/__pycache__/
