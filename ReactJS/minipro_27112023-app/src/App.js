@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react'
-import api from './api'
+import api from './App.css'
 
 const App = () => {
   const [users, setUsers] = useState([]);
@@ -36,10 +36,13 @@ const App = () => {
       password: '',
       confirm_password: ''
     })
-  }
+  };
+
+
 
   return (
     <div>
+
       <nav className='navba navbar-dark bg-primary'>
         <div className='container-fluid'>
           <a className='navbar-brand' href="#">
@@ -47,6 +50,44 @@ const App = () => {
           </a>
         </div>
       </nav>
+      
+      <div className='container'>
+        <form onSubmit={handelFormSubmit}>
+
+          <div className='mb-3 mt-3'>
+            <label htmlFor='name' className='form-label'>
+              Name
+            </label>
+            <input type='text' className='form-control' id='name' name='name' onChange={handleInputChange} value={formData.name}/>
+          </div>
+
+          <div className='mb-3'>
+            <label htmlFor='email' className='form-label'>
+              E-mail
+            </label>
+            <input type='text' className='form-control' id='email' name='email' onChange={handleInputChange} value={formData.email}/>
+          </div>
+
+          <div className='mb-3'>
+            <label htmlFor='password' className='form-label'>
+              Password
+            </label>
+            <input type='password' className='form-control' id='password' name='password' onChange={handleInputChange} value={formData.password}/>
+          </div>
+
+          <div className='mb-3'>
+            <label htmlFor='confirm_password' className='form-label'>
+              Confirm Password
+            </label>
+            <input type='password' className='form-control' id='confirm_password' name='confirm_password' onChange={handleInputChange} value={formData.confirm_password}/>
+          </div>
+
+          <button type='submit' className='btn btn-primary'>
+            Create
+          </button>
+        </form>
+      </div>
+
     </div>
   )
 }

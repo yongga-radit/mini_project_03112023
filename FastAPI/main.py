@@ -186,7 +186,7 @@ async def delete_loan(
     return await delete.delete_loan(loan_id=loan_id, payload=payload, db=db)
 
 
-origins = ["*"]
+origins = ["http://localhost:3000"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
